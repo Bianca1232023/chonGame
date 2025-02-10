@@ -60,20 +60,20 @@ public class HeroMovement extends Agent{
         if (input.contains("RIGHT")) {
             currentFrameDOWN = 0;
             currentFrameUP = 0;
-            setPositionX(getPositionX() + 1);
+            setPositionX(getPositionX() + 10);
             startWalkingRightAnimation();
         } else if (input.contains("LEFT")) {
             currentFrameDOWN = 0;
             currentFrameUP = 0;
-            setPositionX(getPositionX() - 1);
+            setPositionX(getPositionX() - 10);
             startStoppedOrGoingBack();
         } else if (input.contains("UP")) {
             currentFrameDOWN = 0;
-            setPositionY(getPositionY() - 1);
+            setPositionY(getPositionY() - 10);
             startGoingUpAnimation();
         } else if (input.contains("DOWN")) {
             currentFrameUP = 0;
-            setPositionY(getPositionY() + 1);
+            setPositionY(getPositionY() + 10);
             startGoingDownAnimation();
         } else if(input.isEmpty()) {
             startStoppedOrGoingBack();

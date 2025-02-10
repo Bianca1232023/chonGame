@@ -99,17 +99,17 @@ public class Agent {
         this.alive = alive;
     }
 
-    public void move(String input) {
-        if (input.contains("RIGHT")) {
-            setPositionX(positionX += 3);
-        } else if (input.contains("LEFT")) {
-            setPositionX(positionX -= 3);
-        } else if (input.contains("UP")) {
-            setPositionY(positionY -= 3);
-        } else if (input.contains("DOWN")) {
-            setPositionY(positionY += 3);
+    public void move(String direction) {
+        if (direction.equals("LEFT")) {
+            this.positionX -= 10;
+        } else if (direction.equals("RIGHT")) {
+            this.positionX += 10;
+        } else if (direction.equals("UP")) {
+            this.positionY -= 10;
+        } else if (direction.equals("DOWN")) {
+            this.positionY += 10;
         }
-    }
+    }    
 
     // Método para iniciar a explosão
     public void startExplosion() {

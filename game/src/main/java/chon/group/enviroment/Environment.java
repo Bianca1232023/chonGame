@@ -3,6 +3,7 @@ package chon.group.enviroment;
 import java.util.ArrayList;
 
 import chon.group.agent.Agent;
+import chon.group.agent.HeroMovement;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -125,9 +126,24 @@ public class Environment {
     }
 
     public void printLifeEnergybar(Agent agent) {
-        Image lifeBarImage = new Image
-        (getClass().getResource("/images/agent/Life_bar_and_energy_bar/barra de vida1.png").toExternalForm());
+        Image lifeBarImage = null;
+        if (agent.getLife() == 5) {
+            lifeBarImage = new Image(getClass().getResource("/images/agent/Life_bar_and_energy_bar/barra de vida1.png").toExternalForm());
+        } else if (agent.getLife() == 4) {
+            lifeBarImage = new Image(getClass().getResource("/images/agent/Life_bar_and_energy_bar/barra de vida2.png").toExternalForm());
+        } else if (agent.getLife() == 3) {
+            lifeBarImage = new Image(getClass().getResource("/images/agent/Life_bar_and_energy_bar/barra de vida3.png").toExternalForm());
+        } else if (agent.getLife() == 2) {
+            lifeBarImage = new Image(getClass().getResource("/images/agent/Life_bar_and_energy_bar/barra de vida4.png").toExternalForm());
+        } else if (agent.getLife() == 1) {
+            lifeBarImage = new Image(getClass().getResource("/images/agent/Life_bar_and_energy_bar/barra de vida5.png").toExternalForm());
+        } else if (agent.getLife() == 0) {
+            lifeBarImage = new Image(getClass().getResource("/images/agent/Life_bar_and_energy_bar/barra de vida6.png").toExternalForm());
+        }
+    
+
         gc.drawImage(lifeBarImage, agent.getPositionX() + 10, agent.getPositionY() - 5);
+    
         Image energyBarImage = new Image
         (getClass().getResource("/images/agent/Life_bar_and_energy_bar/barra de energia 1.png").toExternalForm());
         gc.drawImage(energyBarImage, agent.getPositionX() + 10, agent.getPositionY() - -6);
@@ -160,13 +176,22 @@ public class Environment {
         return true;
     }
 
-    public boolean checkCollision(Agent agent1, Agent agent2) {
-        return agent1.getPositionX() < agent2.getPositionX() + agent2.getWidth() &&
-               agent1.getPositionX() + agent1.getWidth() > agent2.getPositionX() &&
-               agent1.getPositionY() < agent2.getPositionY() + agent2.getHeight() &&
-               agent1.getPositionY() + agent1.getHeight() > agent2.getPositionY();
+public boolean checkCollision(Agent agent1, Agent agent2) {
+    boolean collisionDetected = agent1.getPositionX() < agent2.getPositionX() + agent2.getWidth() &&
+                                agent1.getPositionX() + agent1.getWidth() > agent2.getPositionX() &&
+                                agent1.getPositionY() < agent2.getPositionY() + agent2.getHeight() &&
+                                agent1.getPositionY() + agent1.getHeight() > agent2.getPositionY();
+
+    if (collisionDetected) {
+        if (agent1 instanceof HeroMovement) {
+            HeroMovement hero = (HeroMovement) agent1;
+            hero.desacrease_life(1); 
+        }
     }
-    
+
+    return collisionDetected;
+}
+
 
 
 }
