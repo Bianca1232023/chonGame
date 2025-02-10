@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import chon.group.agent.Agent;
 import chon.group.agent.HeroMovement;
+import chon.group.agent.Shot;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -19,6 +20,10 @@ public class Environment {
     private Agent protagonist;
     private ArrayList<Agent> agents = new ArrayList<>();
     private GraphicsContext gc;
+    private Image pauseScreen;
+    private Image gameOverScreen;
+    private boolean paused = false;
+    private ArrayList<Shot> shots = new ArrayList<>();
 
     public Environment() {
 
@@ -32,6 +37,7 @@ public class Environment {
         this.gc = gc;
         setImage(pathImage);
         setAgents(agents);
+        this.gameOverScreen = new Image(getClass().getResource("/images/agent/gameOver/Gemini_Generated_Image_pyu4swpyu4swpyu4.jpg").toExternalForm());
     }
 
     public int getWidth() {
@@ -105,6 +111,14 @@ public class Environment {
         this.gc = gc;
     }
 
+    public boolean isPaused() {
+        return paused;
+    }
+    
+    public void setPause(boolean paused) {
+        this.paused = paused;
+    }
+
     public void drawBackground() {
         gc.drawImage(this.image, this.positionX, this.positionY, this.width, this.height);
     }
@@ -117,9 +131,34 @@ public class Environment {
         for (Agent agent : agents){
             gc.drawImage(agent.getImage(), agent.getPositionX(), agent.getPositionY(), agent.getWidth(), agent.getHeight());
         }
+        drawShots();
         printStatusPanel(this.protagonist);
         printLifeEnergybar(this.protagonist);
     }    
+
+    public Image getPauseScreen() {
+        return pauseScreen;
+    }
+
+    public void setPauseScreen() {
+        this.pauseScreen = pauseScreen;
+    }
+
+    public Image getGameOverScreen() {
+        return gameOverScreen;
+    }
+
+    public void setGameOverScreen(Image gameOverScreen) {
+        this.gameOverScreen = gameOverScreen;
+    }
+
+    public void addShot(Shot shot) {
+        this.shots.add(shot);
+    }
+    
+    public ArrayList<Shot> getShots() {
+        return this.shots;
+    }
 
     public void clearRect(){
         gc.clearRect(0, 0, 1180, 780);
@@ -148,7 +187,7 @@ public class Environment {
         (getClass().getResource("/images/agent/Life_bar_and_energy_bar/barra de energia 1.png").toExternalForm());
         gc.drawImage(energyBarImage, agent.getPositionX() + 10, agent.getPositionY() - -6);
 	}
-
+    
     public void printStatusPanel(Agent agent) {
 
         gc.setFill(Color.WHITE);
@@ -186,12 +225,67 @@ public boolean checkCollision(Agent agent1, Agent agent2) {
         if (agent1 instanceof HeroMovement) {
             HeroMovement hero = (HeroMovement) agent1;
             hero.desacrease_life(1); 
+
+            if (hero.getLife() <= 0) {
+                hero.setAlive(false);
+                gameOverScreen();
+            }
         }
     }
+
 
     return collisionDetected;
 }
 
+public void drawShots() {
+    for (Shot shot : shots) {
+        if (shot.isAlive()) {
+            gc.drawImage(shot.getImage(), shot.getPositionX(), shot.getPositionY());
+        }
+    }
+}
+
+public boolean checkCollisionShot(Shot shot, Agent asteroid) {
+    boolean collisionDetected = shot.getPositionX() < asteroid.getPositionX() + asteroid.getWidth() &&
+                                shot.getPositionX() + shot.getImage().getWidth() > asteroid.getPositionX() &&
+                                shot.getPositionY() < asteroid.getPositionY() + asteroid.getHeight() &&
+                                shot.getPositionY() + shot.getImage().getHeight() > asteroid.getPositionY();
+
+    if (collisionDetected) {
+        shot.setAlive(false);
+        asteroid.setAlive(false); 
+    }
+
+    return collisionDetected;
+}
+public void pauseScreen() {
+    if (pauseScreen != null && gc != null) {
+        double centerX = (this.width - pauseScreen.getWidth()) / 2;
+        double centerY = (this.height - pauseScreen.getHeight()) / 2;
+
+        // Draw image on the center of screen
+        gc.drawImage(pauseScreen, centerX, centerY);
+    } else {
+        System.out.println("Pause image not set or GraphicsContext is null.");
+    }
+}
+
+public void gameOverScreen() {
+    if (gameOverScreen != null && gc != null) {
+        gc.clearRect(0, 0, width, height);
+
+        double centerX = (this.width - gameOverScreen.getWidth()) / 2;
+        double centerY = (this.height - gameOverScreen.getHeight()) / 2;
+
+        gc.drawImage(gameOverScreen, centerX, centerY);
+
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Verdana", FontWeight.BOLD, 50));
+        gc.fillText("GAME OVER", width / 2 - 150, height / 2 - 50);
+    } else {
+        System.out.println("Game Over image not set or GraphicsContext is null.");
+    }
+}
 
 
 }

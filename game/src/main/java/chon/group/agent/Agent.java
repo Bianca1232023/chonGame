@@ -1,8 +1,12 @@
 package chon.group.agent;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import javafx.scene.SnapshotParameters;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 
 public class Agent {
     private int positionX;
@@ -18,9 +22,16 @@ public class Agent {
     private long explosionStartTime = 0; // Marca o tempo que a explosão começa
     private int life;
     private boolean alive = true;
+    private int posX;
+    private int posY;
+    private int speed;
+    public boolean isPursuer;
+
+    /** Indicates if the agent is facing left. */
+    private boolean flipped = false;
 
     public Agent(int positionX, int positionY, int width, int height, String pathImage, boolean isProtagonist,
-            int life) {
+            int life, boolean isPursuer) {
         this.positionX = positionX;
         this.positionY = positionY;
         this.width = width;
@@ -32,6 +43,7 @@ public class Agent {
         this.explosionImages = new ArrayList<>();
         this.explosionFrame = 0;
         this.isExploding = false;
+        this.isPursuer = isPursuer;
 
         for (int i = 1; i <= 8; i++) {
             explosionImages.add(new Image(
@@ -42,6 +54,47 @@ public class Agent {
             numberProtagonist++;
         }
     }
+
+    
+    public boolean isPursuer() {
+        return isPursuer;
+    }
+
+
+    public void setPursuer(boolean isPursuer) {
+        this.isPursuer = isPursuer;
+    }
+
+
+    public int getPosX() {
+        return posX;
+    }
+
+
+    public void setPosX(int posX) {
+        this.posX = posX;
+    }
+
+
+    public int getPosY() {
+        return posY;
+    }
+
+
+    public void setPosY(int posY) {
+        this.posY = posY;
+    }
+
+
+    public boolean isFlipped() {
+        return flipped;
+    }
+
+
+    public void setFlipped(boolean flipped) {
+        this.flipped = flipped;
+    }
+
 
     public int getPositionX() {
         return positionX;
@@ -97,6 +150,10 @@ public class Agent {
 
     public void setAlive(boolean alive) {
         this.alive = alive;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
     }
 
     public void move(String direction) {
@@ -167,5 +224,63 @@ public class Agent {
         }
         System.out.println(this.life);
 
+    }
+
+    public void gameOver(int life) {
+        if (life <= 0) {
+
+        }
+    }
+
+    private void flipImage() {
+        ImageView flippedImage = new ImageView(image);
+        flippedImage.setScaleX(-1);
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        this.flipped = !this.flipped;
+        this.image = flippedImage.snapshot(params, null);
+    }
+
+    /**
+     * Moves the agent based on the movement commands provided.
+     *
+     * @param movements a list of movement directions ("RIGHT", "LEFT", "UP",
+     *                  "DOWN")
+     */
+    public void move(List<String> movements) {
+        if (movements.contains("RIGHT")) {
+            if (flipped)
+                this.flipImage();
+            setPosX(posX += speed);
+        } else if (movements.contains("LEFT")) {
+            if (!flipped)
+                this.flipImage();
+            setPosX(posX -= speed);
+        } else if (movements.contains("UP")) {
+            setPosY(posY -= speed);
+        } else if (movements.contains("DOWN")) {
+            setPosY(posY += speed);
+        }
+    }
+
+    /**
+     * Makes the agent chase a target based on its coordinates.
+     *
+     * @param targetX the target's X (horizontal) position
+     * @param targetY the target's Y (vertical) position
+     */
+     
+     public void chase(int targetX, int targetY) {
+        if (targetX > this.positionX) {
+            this.positionX += speed; // Move para a direita
+        } else if (targetX < this.positionX) {
+            this.positionX -= speed; // Move para a esquerda
+        }
+    
+        if (targetY > this.positionY) {
+            this.positionY += speed; // Move para baixo
+        } else if (targetY < this.positionY) {
+            this.positionY -= speed; // Move para cima
+        }
     }
 }

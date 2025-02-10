@@ -44,7 +44,7 @@ public class HeroMovement extends Agent{
 
     public HeroMovement(int positionX, int positionY, int width, int height, String pathImage, boolean isProtagonist,
             int life) {
-        super(positionX, positionY, width, height, pathImage, isProtagonist, life);
+        super(positionX, positionY, width, height, pathImage, isProtagonist, life, isProtagonist);
     }
 
     public Image getHeroImage() {

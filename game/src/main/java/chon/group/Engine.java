@@ -6,6 +6,7 @@ import java.util.Random;
 
 import chon.group.agent.Agent;
 import chon.group.agent.HeroMovement;
+import chon.group.agent.Shot;
 import chon.group.enviroment.Environment;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -31,17 +32,24 @@ public class Engine extends Application {
         try {
             ArrayList<Agent> agents = new ArrayList<>();
 
-            Agent agentA = new Agent(920, 420, 134, 80, "/images/agent/Asteroid/asteroide1.png", false, 0);
-            agents.add(agentA);
+            Agent agentA = new Agent(920, 420, 134, 80, "/images/agent/Asteroid/asteroide1.png", false, 0, false);
+            agentA.setSpeed(2); // Define a velocidade do asteroide
+            agentA.setPursuer(false);
 
             Agent agentB = new HeroMovement(70, 410, 120, 100, "/images/agent/Spaceship/spaceship_andando1.png", true, 5);
             agents.add(agentB);
 
-			Agent agentC = new Agent(920, 110, 74, 54, "/images/agent/enemys_space/enemy_drone.png", false, 0);
+			Agent agentC = new Agent(920, 110, 74, 54, "/images/agent/enemys_space/enemy_drone.png", false, 0, true);
 			agents.add(agentC);
+            agentC.setSpeed(2); // Define a velocidade do agentC
 
-			Agent agentD = new Agent(920, 540, 74, 54, "/images/agent/enemys_space/enemy_drone.png", false, 0);
+			Agent agentD = new Agent(920, 540, 74, 54, "/images/agent/enemys_space/enemy_drone.png", false, 0, true);
 			agents.add(agentD);
+            agentD.setSpeed(2); 
+
+            agents.add(agentA);
+            agents.add(agentC);
+            agents.add(agentD);
 
             if (Agent.numberProtagonist == 1) {
                 StackPane root = new StackPane();
@@ -57,10 +65,20 @@ public class Engine extends Application {
                         agents, canvas.getGraphicsContext2D());
 
                 // Inicializa a lista de lifeIcons com 3 ícones
-                for (int i = 0; i < 3; i++) {
+                /*for (int i = 0; i < 3; i++) {
                     Environment lifeIcon = new Environment(964 + (i * (56 + 10)), 638, 56, 47, "/images/agent/Spaceship/Life_icon.png", agents, canvas.getGraphicsContext2D());
                     lifeIcons.add(lifeIcon);
-                }
+                }*/
+
+                // atmosphere.getAgents().get(3).chase(atmosphere.getProtagonist().getPosX(),
+                //                 atmosphere.getProtagonist().getPosY());
+
+                        // for (Agent bot : atmosphere.getAgents()) {
+                        //     if (!bot.isPursuer) {
+                        //         bot.chase(atmosphere.getProtagonist().getPosX(), atmosphere.getProtagonist().getPosY()); 
+                        //     }
+                        // }
+
 
                 startAnimation(canvas, scene, atmosphere, agents);
 
@@ -86,13 +104,31 @@ public class Engine extends Application {
 
     public void startAnimation(Canvas canvas, Scene scene, Environment atmosphere, ArrayList<Agent> agents) {
 
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>(){
             public void handle(KeyEvent e) {
                 String code = e.getCode().toString();
                 input.clear();
                 input.add(code);
+
+				if (code.equals("P")) {
+					if (atmosphere.isPaused()) { 
+						atmosphere.setPause(false); 
+					} else {
+						atmosphere.setPause(true); 
+					}
+                }
+
+                if (code.equals("SPACE")) { // Disparar tiro
+                    Agent protagonist = atmosphere.getProtagonist();
+                    if (protagonist != null) {
+                        int shotX = protagonist.getPositionX() + protagonist.getWidth();
+                        int shotY = protagonist.getPositionY() + protagonist.getHeight() / 2;
+                        Shot shot = new Shot(shotX, shotY, 10, "/images/agent/shot.png"); // Cria um novo tiro
+                        atmosphere.addShot(shot);
+                }
+							
             }
-        });
+        }});
 
         scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent e) {
@@ -104,65 +140,69 @@ public class Engine extends Application {
         new AnimationTimer() {
             @Override
             public void handle(long arg0) {
+                // Obtém o protagonista e verifica se ele está morto
+                Agent protagonist = atmosphere.getProtagonist();
+                if (protagonist == null || !protagonist.isAlive()) {
+                    return; // Para o jogo se o protagonista não existir ou estiver morto
+                }
+        
                 atmosphere.setGc(canvas.getGraphicsContext2D());
-
+        
+                if (atmosphere.isPaused()) {
+                    atmosphere.pauseScreen();
+                    return;
+                }
+        
+                // Move o protagonista com base na entrada do teclado
                 if (!input.isEmpty()) {
-                    atmosphere.getProtagonist().move(input.get(0));
+                    protagonist.move(input.get(0));
                     if (atmosphere.limitsApprove()) {
                         atmosphere.drawAgents(agents);
                     }
                 }
+        
                 atmosphere.clearRect();
                 atmosphere.drawBackground();
+        
+                // Movimenta os inimigos (chama o método chase)
+                // for (Agent agent : agents) {
+                //         if (!agent.getIsProtagonist() && agent.isAlive() && agent.isPursuer()) { // Verifica se é um inimigo, está vivo e deve perseguir
+                //         agent.chase(protagonist.getPositionX(), protagonist.getPositionY());
+                //     }
+                // }
 
+        
+                // Desenha os agentes
                 if (atmosphere.limitsApprove()) {
                     atmosphere.drawAgents(agents);
                     for (Environment lifeIcon : lifeIcons) {
                         lifeIcon.drawLifeIcon();
                     }
                 }
-
-                if (agents.size() > 1) {
-                    Agent asteroid = atmosphere.getAgents().get(0); // O asteroide
-                    Agent spaceship = atmosphere.getAgents().get(1); // A nave espacial
-
-                    // Verifica a colisão e faz o asteroide se mover
-                    if (atmosphere.checkCollision(asteroid, spaceship)) {
-                        System.out.println("Colisão detectada entre o asteroide e a espaçonave!");
-                        spaceship.desacrease_life(1);
-                        if (spaceship.getLife() <= 0) {
-                            spaceship.startExplosion(); // Inicia a explosão da nave
-                            System.out.println("A nave foi destruída!");
-
-                            // Remove o último lifeIcon da lista 
-                            if (!lifeIcons.isEmpty()) {
-                                lifeIcons.remove(lifeIcons.size() - 1);
+        
+                // Move os tiros e verifica colisões
+                for (Iterator<Shot> shotIterator = atmosphere.getShots().iterator(); shotIterator.hasNext();) {
+                    Shot shot = shotIterator.next();
+                    if (shot.isAlive()) {
+                        shot.move(); // Move o tiro
+        
+                        // Verifica se o tiro saiu da tela
+                        if (shot.getPositionX() > atmosphere.getWidth()) {
+                            shot.setAlive(false);
+                        }
+        
+                        for (Agent asteroid : agents) {
+                            if (asteroid.isAlive() && atmosphere.checkCollisionShot(shot, asteroid)) {
+                                System.out.println("Tiro atingiu o asteróide!");
+                                asteroid.setAlive(false); // Destrói o asteróide
+                                shot.setAlive(false); // Destrói o tiro
                             }
                         }
-                        asteroid.setAlive(false); // Destrói o asteroide
-                        asteroid.startExplosion(); // Inicia a explosão do asteroide
-
-                        // Gera um novo asteroide em uma posição aleatória 
-                        int randomX = generateRandomPosition(911, 1071);
-                        int randomY = generateRandomPosition(51, 570);  
-                        Agent newAsteroid = new Agent(randomX, randomY, 134, 80, "/images/agent/Asteroid/asteroide1.png", false, 0);
-                        atmosphere.getAgents().set(0, newAsteroid); // Substitui o asteroide antigo
-                    }
-
-                    // Verifica se o asteroide passou de x: 0 e reaparece em uma nova posição 
-                    if (asteroid.isAlive() && asteroid.getPositionX() < 0) {
-                        int randomX = generateRandomPosition(911, 1071); 
-                        int randomY = generateRandomPosition(51, 570); 
-                        asteroid.setPositionX(randomX);
-                        asteroid.setPositionY(randomY);
-                    }
-
-                    // Move o asteroide para a esquerda
-                    if (asteroid.isAlive()) {
-                        asteroid.move("LEFT");
+                    } else {
+                        shotIterator.remove(); // Remove tiros "mortos"
                     }
                 }
-
+        
                 // Atualiza e redesenha os agentes
                 for (Iterator<Agent> iterator = agents.iterator(); iterator.hasNext();) {
                     Agent agent = iterator.next();
@@ -170,7 +210,7 @@ public class Engine extends Application {
                         iterator.remove();
                     }
                 }
-
+        
                 atmosphere.drawAgents(agents);
             }
         }.start();
