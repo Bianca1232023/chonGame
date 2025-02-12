@@ -31,7 +31,7 @@ public class Engine extends Application {
         try {
             ArrayList<Agent> agents = new ArrayList<>();
 
-            Agent agentA = new Agent(920, 420, 134, 80, "/images/agent/Asteroid/asteroide1.png", false, 0);
+            Agent agentA = new Agent(920, 420, 85, 55, "/images/agent/Asteroid/asteroide1.png", false, 0);
             agents.add(agentA);
 
             Agent agentB = new HeroMovement(70, 410, 120, 100, "/images/agent/Spaceship/spaceship_andando1.png", true, 5);
@@ -145,7 +145,7 @@ public class Engine extends Application {
                         // Gera um novo asteroide em uma posição aleatória 
                         int randomX = generateRandomPosition(911, 1071);
                         int randomY = generateRandomPosition(51, 570);  
-                        Agent newAsteroid = new Agent(randomX, randomY, 134, 80, "/images/agent/Asteroid/asteroide1.png", false, 0);
+                        Agent newAsteroid = new Agent(randomX, randomY, 85, 55, "/images/agent/Asteroid/asteroide1.png", false, 0);
                         atmosphere.getAgents().set(0, newAsteroid); // Substitui o asteroide antigo
                     }
 
