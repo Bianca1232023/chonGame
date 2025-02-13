@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import chon.group.agent.Agent;
 import chon.group.agent.HeroMovement;
+import chon.group.agent.Shot;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -19,6 +20,8 @@ public class Environment {
     private Agent protagonist;
     private ArrayList<Agent> agents = new ArrayList<>();
     private GraphicsContext gc;
+    private ArrayList<Shot> shots = new ArrayList<>();
+
 
     public Environment() {
 
@@ -117,6 +120,7 @@ public class Environment {
         for (Agent agent : agents){
             gc.drawImage(agent.getImage(), agent.getPositionX(), agent.getPositionY(), agent.getWidth(), agent.getHeight());
         }
+        drawShots();
         printStatusPanel(this.protagonist);
         printLifeEnergybar(this.protagonist);
     }    
@@ -192,6 +196,34 @@ public boolean checkCollision(Agent agent1, Agent agent2) {
     return collisionDetected;
 }
 
+public boolean checkCollisionShot(Shot shot, Agent asteroid) {
+    boolean collisionDetected = shot.getPositionX() < asteroid.getPositionX() + asteroid.getWidth() &&
+                                shot.getPositionX() + shot.getImage().getWidth() > asteroid.getPositionX() &&
+                                shot.getPositionY() < asteroid.getPositionY() + asteroid.getHeight() &&
+                                shot.getPositionY() + shot.getImage().getHeight() > asteroid.getPositionY();
 
+    if (collisionDetected) {
+        shot.setAlive(false);
+        asteroid.setAlive(false); 
+    }
 
+    return collisionDetected;
+}
+
+    public ArrayList<Shot> getShots() {
+        return this.shots;
+    }
+
+    public void addShot(Shot shot) {
+        this.shots.add(shot);
+    }    
+
+    public void drawShots() {
+        for (Shot shot : shots) {
+            if (shot.isAlive()) {
+                gc.drawImage(shot.getImage(), shot.getPositionX(), shot.getPositionY());
+            }
+        }
+    }
+    
 }

@@ -19,6 +19,7 @@ public class Agent {
     private int life;
     private boolean alive = true;
 
+
     public Agent(int positionX, int positionY, int width, int height, String pathImage, boolean isProtagonist,
             int life) {
         this.positionX = positionX;
@@ -42,6 +43,8 @@ public class Agent {
             numberProtagonist++;
         }
     }
+
+    
 
     public int getPositionX() {
         return positionX;
@@ -109,7 +112,9 @@ public class Agent {
         } else if (direction.equals("DOWN")) {
             this.positionY += 10;
         }
-    }    
+    }
+    
+
 
     // Método para iniciar a explosão
     public void startExplosion() {
@@ -166,6 +171,5 @@ public class Agent {
             this.life = 0;
         }
         System.out.println(this.life);
-
     }
 }
