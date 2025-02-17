@@ -10,10 +10,7 @@ public class HeroMovement extends Agent{
     private Image HeroImage;
 
     private ArrayList<String> stoppedOrWalkingBackImages = new ArrayList<>(Arrays.asList(
-        "/images/agent/Spaceship/spaceship_parada ou dando ré1.png",
-        "/images/agent/Spaceship/spaceship_parada ou dando ré2.png",
-        "/images/agent/Spaceship/spaceship_parada ou dando ré3.png",
-        "/images/agent/Spaceship/spaceship_parada ou dando ré4.png"
+        "/images/agent/Spaceship/spaceship_parada ou dando ré1.gif"
     ));
 
     private ArrayList<String> walkingForwardImages = new ArrayList<>(Arrays.asList(
@@ -60,25 +57,26 @@ public class HeroMovement extends Agent{
         if (input.contains("RIGHT")) {
             currentFrameDOWN = 0;
             currentFrameUP = 0;
-            setPositionX(getPositionX() + 10);
+            setPositionX(getPositionX() + 7);
             startWalkingRightAnimation();
         } else if (input.contains("LEFT")) {
             currentFrameDOWN = 0;
             currentFrameUP = 0;
-            setPositionX(getPositionX() - 10);
+            setPositionX(getPositionX() - 7);
             startStoppedOrGoingBack();
         } else if (input.contains("UP")) {
             currentFrameDOWN = 0;
-            setPositionY(getPositionY() - 10);
+            setPositionY(getPositionY() - 7);
             startGoingUpAnimation();
         } else if (input.contains("DOWN")) {
             currentFrameUP = 0;
-            setPositionY(getPositionY() + 10);
+            setPositionY(getPositionY() + 7);
             startGoingDownAnimation();
         } else if(input.isEmpty()) {
             startStoppedOrGoingBack();
         }
     }
+
 
     public void startWalkingRightAnimation() {
 

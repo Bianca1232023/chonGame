@@ -2,6 +2,7 @@ package chon.group.agent;
 
 import java.util.ArrayList;
 
+import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 
 public class Agent {
@@ -172,4 +173,9 @@ public class Agent {
         }
         System.out.println(this.life);
     }
+
+    public Rectangle2D getBounds() {
+        return new Rectangle2D(positionX, positionY, width, height);
+    }
+
 }

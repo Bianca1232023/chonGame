@@ -1,5 +1,6 @@
 package chon.group.agent;
 
+
 public class AsteroidMovement extends EnemyMovement {
 
     public AsteroidMovement(int positionX, int positionY, int width, int height, String pathImage, boolean isProtagonist, int life) {
@@ -9,6 +10,7 @@ public class AsteroidMovement extends EnemyMovement {
     @Override
     public void move() {
         // Movimento do asteroide: se move para a esquerda
-        setPositionX(getPositionX() - 5); // Modifique a velocidade conforme necessário
+        setPositionX(getPositionX() - 5); 
     }
+
 }

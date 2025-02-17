@@ -9,6 +9,7 @@ import chon.group.agent.AsteroidMovement;
 import chon.group.agent.DroneMovement;
 import chon.group.agent.HeroMovement;
 import chon.group.agent.Shot;
+import chon.group.enviroment.CollisionDetector;
 import chon.group.enviroment.Environment;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -34,18 +35,17 @@ public class Engine extends Application {
         try {
             ArrayList<Agent> agents = new ArrayList<>();
 
-            // Criando os agentes
-            AsteroidMovement asteroid = new AsteroidMovement(920, 420, 85, 55, "/images/agent/Asteroid/asteroide1.png", false, 0);
+
+            AsteroidMovement asteroid = new AsteroidMovement(920, 420, 85, 55, "/images/agent/Asteroid/asteroide.gif", false, 0);
             agents.add(asteroid); 
 
-            HeroMovement spaceship = new HeroMovement(70, 410, 120, 100, "/images/agent/Spaceship/spaceship_andando1.png", true, 5);
+            HeroMovement spaceship = new HeroMovement(70, 410, 90, 42, "/images/agent/Spaceship/spaceship_parada ou dando ré1.gif", true, 5);
             agents.add(spaceship); 
 
-     
-            DroneMovement drone1 = new DroneMovement(920, 110, 74, 54, "/images/agent/enemys_space/enemy_drone.png", false, 0, spaceship);
+            DroneMovement drone1 = new DroneMovement(920, 110, 74, 54, "/images/agent/enemys_space/enemy_drone1.png", false, 0, spaceship);
             agents.add(drone1);
 
-            DroneMovement drone2 = new DroneMovement(920, 540, 74, 54, "/images/agent/enemys_space/enemy_drone.png", false, 0, spaceship);
+            DroneMovement drone2 = new DroneMovement(920, 540, 74, 54, "/images/agent/enemys_space/enemy_drone1.png", false, 0, spaceship);
             agents.add(drone2);
 
             if (Agent.numberProtagonist == 1) {
@@ -81,7 +81,7 @@ public class Engine extends Application {
         }
     }
 
-    // Método para gerar números aleatórios dentro de um intervalo
+    // Método para gerar valores de posições diferentes para spawnar os inimigos
     private int generateRandomPosition(int min, int max) {
         Random random = new Random();
         return random.nextInt(max - min + 1) + min;
@@ -94,31 +94,31 @@ public class Engine extends Application {
                 String code = e.getCode().toString();
                 input.clear();
                 input.add(code);
-
-                if (code.equals("SPACE")) { // Disparar tiro
+    
+                if (code.equals("SPACE")) { // Dispara tiro
                     Agent protagonist = atmosphere.getProtagonist();
                     if (protagonist != null) {
                         int shotX = protagonist.getPositionX() + protagonist.getWidth();
                         int shotY = protagonist.getPositionY() + protagonist.getHeight() / 2;
-                        Shot shot = new Shot(shotX, shotY, 10, "/images/agent/shot.png"); // Cria um novo tiro
+                        Shot shot = new Shot(shotX, shotY, 10, "/images/agent/shot.gif"); // Cria um novo tiro
                         atmosphere.addShot(shot);
                     }
                 }
             }
         });
-
+    
         scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent e) {
                 String code = e.getCode().toString();
                 input.remove(code);
             }
         });
-
+    
         new AnimationTimer() {
             @Override
             public void handle(long arg0) {
                 atmosphere.setGc(canvas.getGraphicsContext2D());
-
+    
                 if (!input.isEmpty()) {
                     atmosphere.getProtagonist().move(input.get(0));
                     if (atmosphere.limitsApprove()) {
@@ -127,36 +127,36 @@ public class Engine extends Application {
                 }
                 atmosphere.clearRect();
                 atmosphere.drawBackground();
-
+    
                 // Verifica colisões e movimento dos agentes
                 if (agents.size() > 1) {
                     // Pega o asteroide e a nave
                     if (atmosphere.getAgents().get(0) instanceof AsteroidMovement) {
                         AsteroidMovement asteroid = (AsteroidMovement) atmosphere.getAgents().get(0); // Cast seguro
                         HeroMovement spaceship = (HeroMovement) atmosphere.getAgents().get(1); // A nave espacial
-
-                        if (atmosphere.checkCollision(asteroid, spaceship)) {
+    
+                        // Verifica colisão entre asteroide e nave
+                        if (CollisionDetector.checkCollision(asteroid, spaceship)) {
                             System.out.println("Colisão detectada entre o asteroide e a espaçonave!");
                             spaceship.desacrease_life(1); // Corrigido o nome do método
                             if (spaceship.getLife() <= 0) {
                                 spaceship.startExplosion(); // Inicia a explosão da nave
                                 System.out.println("A nave foi destruída!");
-
-                                
+    
                                 if (!lifeIcons.isEmpty()) {
                                     lifeIcons.remove(lifeIcons.size() - 1);
                                 }
                             }
                             asteroid.setAlive(false); 
                             asteroid.startExplosion();
-
+    
                             // Gera um novo asteroide em uma posição aleatória
                             int randomX = generateRandomPosition(911, 1071);
                             int randomY = generateRandomPosition(51, 570);
-                            Agent newAsteroid = new AsteroidMovement(randomX, randomY, 85, 55, "/images/agent/Asteroid/asteroide1.png", false, 0);
-                            atmosphere.getAgents().set(0, newAsteroid); // Substitui o asteroide antigo
+                            Agent newAsteroid = new AsteroidMovement(randomX, randomY, 85, 55, "/images/agent/Asteroid/asteroide.gif", false, 0);
+                            atmosphere.getAgents().set(0, newAsteroid); 
                         }
-
+    
                         // Verifica se o asteroide passou de x: 0 e reaparece em uma nova posição
                         if (asteroid.isAlive() && asteroid.getPositionX() < 0) {
                             int randomX = generateRandomPosition(911, 1071);
@@ -164,20 +164,48 @@ public class Engine extends Application {
                             asteroid.setPositionX(randomX);
                             asteroid.setPositionY(randomY);
                         }
-
-                        
+    
                         if (asteroid.isAlive()) {
                             asteroid.move(); 
                         }
-
-                        // Move os drones para seguir a nave
+    
+                        // Move os drones para seguir a nave e verificar colisões
                         for (int i = 2; i < agents.size(); i++) {
                             DroneMovement drone = (DroneMovement) atmosphere.getAgents().get(i);
-                            drone.move(); 
+                        
+                            // Verifica se o drone está à direita ou à esquerda da nave
+                            /*if (drone.getPositionX() > spaceship.getPositionX()) {
+                                // Drone à direita da nave, espelhe a imagem
+                                drone.setImage("/images/agent/enemys_space/enemy_drone.gif");
+                            } else {
+                                // Drone à esquerda da nave, usa o GIF padrão
+                                drone.setImage("/images/agent/enemys_space/enemy_drone_flip.gif");
+                            }/* */
+                        
+                            if (CollisionDetector.checkCollision(spaceship, drone)) {
+                                System.out.println("Colisão detectada entre a nave e o drone!");
+                                spaceship.desacrease_life(1); 
+                                if (spaceship.getLife() <= 0) {
+                                    spaceship.startExplosion();
+                                    System.out.println("A nave foi destruída!");
+                                }
+                                drone.setAlive(false); 
+                                drone.startExplosion();
+                        
+                                // Gera um novo drone em uma posição aleatória
+                                int randomX = generateRandomPosition(911, 1071);
+                                int randomY = generateRandomPosition(51, 570);
+                                Agent newDrone = new DroneMovement(randomX, randomY, 74, 54, "/images/agent/enemys_space/enemy_drone.gif", false, 0, spaceship);
+                                atmosphere.getAgents().set(i, newDrone); 
+                            }
+                        
+                            if (drone.isAlive()) {
+                                drone.move(); 
+                            }
                         }
                     }
                 }
-
+    
                 // Atualiza e redesenha os agentes
                 for (Iterator<Agent> iterator = agents.iterator(); iterator.hasNext();) {
                     Agent agent = iterator.next();
@@ -185,30 +213,58 @@ public class Engine extends Application {
                         iterator.remove();
                     }
                 }
-
+    
                 // Move os tiros e verifica colisões
                 for (Iterator<Shot> shotIterator = atmosphere.getShots().iterator(); shotIterator.hasNext();) {
                     Shot shot = shotIterator.next();
                     if (shot.isAlive()) {
-                        shot.move(); // Move o tiro
-
+                        shot.move(); 
+                
                         // Verifica se o tiro saiu da tela
                         if (shot.getPositionX() > atmosphere.getWidth()) {
                             shot.setAlive(false);
                         }
-                        for (Agent asteroid : agents) {
-                            if (asteroid.isAlive() && atmosphere.checkCollisionShot(shot, asteroid)) {
-                                System.out.println("Tiro atingiu o asteroide!");
-                                asteroid.setAlive(false); // Destrói o asteroide
-                                shot.setAlive(false); // Destrói o tiro
+                
+                        // Verifica colisões entre o tiro e os asteroides e drones
+                        for (int i = 0; i < agents.size(); i++) {
+                            Agent enemy = agents.get(i);
+                
+                            if (enemy.isAlive() && atmosphere.checkCollisionShot(shot, enemy)) {
+                                shot.setAlive(false); // O tiro desaparece ao atingir o inimigo
+                
+                                if (enemy instanceof AsteroidMovement) {
+                                    System.out.println("Tiro atingiu o asteroide!");
+                
+                                    enemy.setAlive(false);
+                                    enemy.startExplosion();
+                
+                                    // Cria um novo asteroide na tela
+                                    int randomX = generateRandomPosition(911, 1071);
+                                    int randomY = generateRandomPosition(51, 570);
+                                    Agent newAsteroid = new AsteroidMovement(randomX, randomY, 85, 55, "/images/agent/Asteroid/asteroide.gif", false, 0);
+                                    agents.set(i, newAsteroid);
+                                } 
+                
+                                if (enemy instanceof DroneMovement) {
+                                    System.out.println("Tiro atingiu o drone!");
+                
+                                    enemy.setAlive(false);
+                                    enemy.startExplosion();
+                
+                                    // Cria um novo drone na tela
+                                    int randomX = generateRandomPosition(911, 1071);
+                                    int randomY = generateRandomPosition(51, 570);
+                                    Agent newDrone = new DroneMovement(randomX, randomY, 74, 54, "/images/agent/enemys_space/enemy_drone.gif", false, 2, atmosphere.getProtagonist());
+                                    agents.set(i, newDrone);
+                                }
                             }
                         }
                     } else {
-                        shotIterator.remove(); // Remove tiros "mortos"
+                        shotIterator.remove(); // Remove o tiro
                     }
-                }
-
-                // Redesenha todos os agentes
+                }                
+    
+           
                 atmosphere.drawAgents(agents);
                 for (Environment lifeIcon : lifeIcons) {
                     lifeIcon.drawLifeIcon();

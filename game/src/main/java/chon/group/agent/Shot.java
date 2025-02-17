@@ -1,8 +1,9 @@
 package chon.group.agent;
 
+
 import javafx.scene.image.Image;
 
-public class Shot {
+public class Shot{
     private int positionX;
     private int positionY;
     private int speed;
@@ -13,7 +14,7 @@ public class Shot {
         this.positionX = positionX;
         this.positionY = positionY;
         this.speed = speed;
-        this.image = new Image(getClass().getResource("/images/bullet/blast1.png").toExternalForm());
+        this.image = new Image(getClass().getResource("/images/bullet/blast1.gif").toExternalForm());
         this.alive = true;
     }
 
@@ -46,7 +47,7 @@ public class Shot {
     }
 
     public void setImage(String pathImage) {
-        this.image = new Image(getClass().getResource("/images/bullet/blast1.png").toExternalForm());
+        this.image = new Image(getClass().getResource("/images/bullet/blast1.gif").toExternalForm());
     }
 
     public boolean isAlive() {
@@ -60,4 +61,5 @@ public class Shot {
     public void move() {
         this.positionX += speed; 
     }
+
 }
